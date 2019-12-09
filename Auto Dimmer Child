@@ -22,6 +22,7 @@
  *
  *  V1.0.0 - 12/1/2019 - Initial release.
  *  V1.0.1 - 12/2/2019 - Remove debug logs used to help write the app.
+ *  V1.0.2 - 12/9/2019 - Added app events.
  */
 
 definition(
@@ -223,6 +224,7 @@ def luxHandler(evt) {
         slaveDimmer.each{
             if (it.currentValue("switch") == "on" & it.currentValue("level") == oldlevel){
 	        LOGDEBUG("Setting " + it + " to level " + newlevel)
+            sendEvent(name:"${app.label}", value: "${it} - Level ${newlevel}", descriptionText: "${it} set to Level ${newlevel} because lux changed")
 		    it.setLevel(newlevel)
             } else{
                 LOGDEBUG("Not setting " + it + " because it is currently " + it.currentValue("switch") + ":" + it.currentValue("level"))
@@ -281,6 +283,7 @@ def switchHandler(evt){
 		
     if (evt.value == "on"){
             evt.device.setLevel(newlevel,5)
+            sendEvent(name:"${app.label}", value: "${evt.displayName} - Level ${newlevel}", descriptionText: "${evt.displayName} set to Level ${newlevel} because it was turned ON")
             LOGDEBUG(evt.displayName + " set to " + newlevel)
 	}
 }
@@ -305,18 +308,6 @@ def statusHandler(evt){
 
 def onoffSwitchHandler(evt){
   	LOGDEBUG("Enable/Disable Switch updated.Event Value: " + evt.value)
-	if (evt.value == "on")
-	{
-		def NewLevel = masterDimmer.currentValue("level").toInteger() + slaveOffset
-		if (NewLevel < 1) {NewLevel = 1}
-		if (NewLevel > 100) {NewLevel = 100}
-
-		slaveDimmer.each
-		{
-			LOGDEBUG("Turning ON " + it)
-			if (it?.on()) {delayBetween([it.on(), it.setLevel(NewLevel)], 500)}
-		}
-	}
 }
 
 def display() {
@@ -329,6 +320,7 @@ def display() {
 def display2() {
 	section() {
 		paragraph getFormat("line")
-		paragraph "<div style='color:#00CED1;text-align:center'>Auto Dimmer Child - App Version: 1.0.1</div>"
+		paragraph "<div style='color:#00CED1;text-align:center'>Auto Dimmer Child - App Version: 1.0.2</div>"
 	}
 }
+
